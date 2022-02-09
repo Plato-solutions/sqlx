@@ -29,9 +29,9 @@ impl MySqlTypeInfo {
     #[doc(hidden)]
     pub const fn __enum() -> Self {
         Self {
-            r#type: ColumnType::Enum,
-            flags: ColumnFlags::BINARY,
-            char_set: 63,
+            r#type: ColumnType::String,
+            flags: ColumnFlags::ENUM,
+            char_set: 224,
             max_size: None,
         }
     }
