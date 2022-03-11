@@ -42,6 +42,15 @@ impl<T> AsMut<T> for Json<T> {
     }
 }
 
+use serde::de::DeserializeOwned;
+impl<T: DeserializeOwned> TryFrom<serde_json::Value> for Json<T> {
+    type Error = serde_json::Error;
+
+    fn try_from(value: serde_json::Value) -> Result<Json<T>,serde_json::Error> {
+        Ok(Json(serde_json::from_value(value)?))
+    }
+}
+
 impl<DB> Type<DB> for JsonValue
 where
     Json<Self>: Type<DB>,
