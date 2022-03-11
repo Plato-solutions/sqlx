@@ -11,6 +11,7 @@ use crate::query::QueryMacroInput;
 use std::fmt::{self, Display, Formatter};
 use syn::parse::{Parse, ParseStream};
 use syn::Token;
+use sqlx_core::type_info::TypeInfo;
 
 pub struct RustColumn {
     pub(super) ident: Ident,
@@ -107,7 +108,22 @@ fn column_to_rust<DB: DatabaseExt>(describe: &Describe<DB>, i: usize) -> crate::
         (ColumnTypeOverride::None, _) => {
             let type_ = get_column_type::<DB>(i, column);
             if !nullable {
-                ColumnType::Exact(type_)
+                #[cfg(not(feature = "json"))]
+                {
+                    ColumnType::Exact(type_)
+                }
+                #[cfg(feature = "json")]
+                {
+                    let rust_type = column.type_info().name();
+                    let db_type = &type_.to_string();
+
+                    if rust_type == "JSON" && db_type == "serde_json :: Value" {
+                        //ColumnType::Exact("Json");
+                        ColumnType::Wildcard
+                    } else {
+                        ColumnType::Exact(type_)
+                    }
+                }
             } else {
                 ColumnType::Exact(quote! { ::std::option::Option<#type_> })
             }
