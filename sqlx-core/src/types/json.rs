@@ -42,6 +42,7 @@ impl<T> AsMut<T> for Json<T> {
     }
 }
 
+use std::convert::TryFrom;
 use serde::de::DeserializeOwned;
 impl<T: DeserializeOwned> TryFrom<serde_json::Value> for Json<T> {
     type Error = serde_json::Error;
